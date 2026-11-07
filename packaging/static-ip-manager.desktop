@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Static IP Manager
+Comment=Set a static IPv4 configuration safely, with automatic rollback
+Exec=static-ip-manager
+Icon=network-wired
+Terminal=false
+Categories=Network;Settings;
