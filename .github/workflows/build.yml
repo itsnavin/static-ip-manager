@@ -18,7 +18,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest]
+        include:
+          - { os: ubuntu-22.04, arch: x86_64, deb: amd64 }
+          - { os: ubuntu-22.04-arm, arch: aarch64, deb: arm64 }
+          - { os: windows-latest, arch: x86_64 }
+          - { os: windows-11-arm, arch: aarch64 }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -41,11 +45,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          cp target/release/static-ip-manager dist/static-ip-manager-linux-x86_64
-          tar -C dist -czf dist/static-ip-manager-linux-x86_64.tar.gz static-ip-manager-linux-x86_64
-          rm dist/static-ip-manager-linux-x86_64
+          cp target/release/static-ip-manager dist/static-ip-manager-linux-${{ matrix.arch }}
+          tar -C dist -czf dist/static-ip-manager-linux-${{ matrix.arch }}.tar.gz static-ip-manager-linux-${{ matrix.arch }}
+          rm dist/static-ip-manager-linux-${{ matrix.arch }}
           cargo install cargo-deb --locked
-          cargo deb --no-build -o dist/static-ip-manager_amd64.deb
+          cargo deb --no-build -o dist/static-ip-manager_${{ matrix.deb }}.deb
           # AppImage
           mkdir -p AppDir/usr/bin
           cp target/release/static-ip-manager AppDir/usr/bin/
@@ -54,20 +58,18 @@ jobs:
           convert -size 256x256 xc:'#388bfd' AppDir/static-ip-manager.png
           printf '#!/bin/sh\nexec "$(dirname "$(readlink -f "$0")")/usr/bin/static-ip-manager" "$@"\n' > AppDir/AppRun
           chmod +x AppDir/AppRun
-          curl -fsSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          curl -fsSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.arch }}.AppImage
           chmod +x appimagetool
-          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir dist/static-ip-manager-x86_64.AppImage
+          ARCH=${{ matrix.arch }} ./appimagetool --appimage-extract-and-run AppDir dist/static-ip-manager-${{ matrix.arch }}.AppImage
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory dist | Out-Null
-          Copy-Item target/release/static-ip-manager.exe dist/static-ip-manager-windows-x86_64.exe
-          Compress-Archive -Path dist/static-ip-manager-windows-x86_64.exe -DestinationPath dist/static-ip-manager-windows-x86_64.zip
-          Remove-Item dist/static-ip-manager-windows-x86_64.exe
+          Copy-Item target/release/static-ip-manager.exe dist/static-ip-manager-windows-${{ matrix.arch }}.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ runner.os }}
+          name: dist-${{ matrix.os }}
           path: dist/*
 
   release:

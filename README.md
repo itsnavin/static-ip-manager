@@ -38,8 +38,10 @@ Uses the `NetTCPIP` / `DnsClient` PowerShell cmdlets (`New-NetIPAddress`, `Set-N
 
 Get binaries from the [Releases](https://github.com/itsnavin/static-ip-manager/releases) page (`SHA256SUMS.txt` included):
 
-- Windows: `static-ip-manager-windows-x86_64.zip`
-- Linux: `static-ip-manager_amd64.deb` (`sudo apt install ./static-ip-manager_amd64.deb`), `static-ip-manager-x86_64.AppImage`, or `static-ip-manager-linux-x86_64.tar.gz`
+- Windows: `static-ip-manager-windows-x86_64.exe` (Intel/AMD) or `static-ip-manager-windows-aarch64.exe` (ARM) - single file, just run it
+- Linux x86_64: `static-ip-manager_amd64.deb`, `static-ip-manager-x86_64.AppImage`, `static-ip-manager-linux-x86_64.tar.gz`
+- Linux ARM64 (Raspberry Pi 3/4/5 with 64-bit OS, etc.): `static-ip-manager_arm64.deb` (`sudo apt install ./static-ip-manager_arm64.deb`), `static-ip-manager-aarch64.AppImage`, `static-ip-manager-linux-aarch64.tar.gz`
+- 32-bit ARM (armv7) is not published; build from source.
 
 Verify: `sha256sum -c SHA256SUMS.txt` (Linux) or `Get-FileHash` (Windows).
 
@@ -80,7 +82,7 @@ Linux build dependencies (Debian/Ubuntu): `libxkbcommon-dev libwayland-dev libx1
 - systemd-networkd: a `.network` file named earlier than `05-` that matches the same interface wins.
 - Switching to DHCP on dhcpcd/networkd may leave old addresses until the lease is renewed.
 - Duplicate-IP check is ping-only: no reply does not prove an address is free.
-- x86_64 only; Windows binary is unsigned (SmartScreen may warn); no ARM (Raspberry Pi) build is published yet - build from source on the Pi (`cargo build --release`).
+- Windows binaries is unsigned (SmartScreen may warn) (ARM64 builds are published but untested on real hardware).
 - Windows 10/11 with PowerShell 5.1+ assumed.
 
 ## Testing
